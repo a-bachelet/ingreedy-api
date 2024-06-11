@@ -1,0 +1,67 @@
+{
+  "RSpec": {
+    "coverage": {
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/channels/application_cable/channel.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {
+        }
+      },
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/channels/application_cable/connection.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {
+        }
+      },
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/controllers/application_controller.rb": {
+        "lines": [
+          0,
+          0
+        ],
+        "branches": {
+        }
+      },
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/jobs/application_job.rb": {
+        "lines": [
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0
+        ],
+        "branches": {
+        }
+      },
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/mailers/application_mailer.rb": {
+        "lines": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "branches": {
+        }
+      },
+      "/home/a-bachelet/projects/ingreedy/ingreedy-api/app/models/application_record.rb": {
+        "lines": [
+          0,
+          0,
+          0
+        ],
+        "branches": {
+        }
+      }
+    },
+    "timestamp": 1718095616
+  }
+}

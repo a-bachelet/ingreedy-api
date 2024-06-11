@@ -1,0 +1,16 @@
+require:
+  - rubocop-capybara
+  - rubocop-factory_bot
+  - rubocop-rails
+  - rubocop-rspec
+  - rubocop-rspec_rails
+
+AllCops:
+  TargetRubyVersion: 3.3
+  NewCops: enable
+
+Rails:
+  Enabled: true
+
+Style/Documentation:
+  Enabled: false
