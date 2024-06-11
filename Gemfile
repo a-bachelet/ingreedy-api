@@ -20,12 +20,13 @@ end
 
 group :test do
   gem 'capybara', '~> 3.40'
-  gem 'factory_bot_rails', '~> 6.4'
-  gem 'rspec-rails', '~> 6.1'
   gem 'simplecov', '~> 0.22.0'
 end
 
 group :development, :test do
+  gem 'factory_bot_rails', '~> 6.4'
+  gem 'rspec-rails', '~> 6.1'
+
   gem 'debug', platforms: %i[mri windows]
   gem 'pry-rails', '~> 0.3.9'
   gem 'rubocop', '~> 1.64'
