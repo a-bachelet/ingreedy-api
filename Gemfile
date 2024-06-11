@@ -24,11 +24,9 @@ group :test do
 end
 
 group :development, :test do
+  gem 'debug', platforms: %i[mri windows]
   gem 'factory_bot_rails', '~> 6.4'
   gem 'rspec-rails', '~> 6.1'
-
-  gem 'debug', platforms: %i[mri windows]
-  gem 'pry-rails', '~> 0.3.9'
   gem 'rubocop', '~> 1.64'
   gem 'rubocop-capybara', '~> 2.21'
   gem 'rubocop-factory_bot', '~> 2.26'
@@ -36,3 +34,4 @@ group :development, :test do
   gem 'rubocop-rspec', '~> 2.31'
   gem 'rubocop-rspec_rails', '~> 2.29'
 end
+
