@@ -16,6 +16,7 @@ gem 'tzinfo-data', platforms: %i[windows jruby]
 group :development do
   gem 'annotate', '~> 3.2'
   gem 'bundler-audit', '~> 0.9.1'
+  gem "reek", "~> 6.3"
 end
 
 group :test do
@@ -34,4 +35,3 @@ group :development, :test do
   gem 'rubocop-rspec', '~> 2.31'
   gem 'rubocop-rspec_rails', '~> 2.29'
 end
-

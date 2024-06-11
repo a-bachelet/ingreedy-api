@@ -1,0 +1,53 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.0
+
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle install
+
+    - name: Lint code with RuboCop
+      run: bundle exec rubocop
+
+    - name: Code analysis with Reek
+      run: bundle exec reek
+
+    - name: Check for vulnerabilities with Bundler Audit
+      run: bundle exec bundler-audit check --update
+
+    - name: Set up the database
+      run: |
+        cp config/database.yml.ci config/database.yml
+        bin/rails db:create
+        bin/rails db:migrate
+
+    - name: Run tests
+      run: bundle exec rspec
