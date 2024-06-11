@@ -45,7 +45,6 @@ jobs:
 
     - name: Set up the database
       run: |
-        cp config/database.yml config/database.yml
         bin/rails db:create
         bin/rails db:migrate
 
