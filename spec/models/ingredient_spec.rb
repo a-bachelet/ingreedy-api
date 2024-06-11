@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: ingredients
@@ -9,14 +11,14 @@
 #
 require 'rails_helper'
 
-RSpec.describe Ingredient, type: :model do
+RSpec.describe Ingredient do
   it 'is valid with a name' do
-    ingredient = Ingredient.new(name: 'Salt')
+    ingredient = described_class.new(name: 'Salt')
     expect(ingredient).to be_valid
   end
 
   it 'is invalid without a name' do
-    ingredient = Ingredient.new(name: nil)
+    ingredient = described_class.new(name: nil)
     expect(ingredient).not_to be_valid
   end
 end

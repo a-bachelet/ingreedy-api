@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: ingredients
@@ -8,5 +10,5 @@
 #  updated_at :datetime         not null
 #
 class Ingredient < ApplicationRecord
-    validates :name, presence: true
+  validates :name, presence: true
 end

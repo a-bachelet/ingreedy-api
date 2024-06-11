@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: ingredients
@@ -9,6 +11,6 @@
 #
 FactoryBot.define do
   factory :ingredient do
-    name { "MyString" }
+    name { 'MyString' }
   end
 end
