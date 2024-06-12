@@ -33,4 +33,4 @@
 /config/master.key
 
 # Ignore coverage report
-/coverage
+/coverage/*
