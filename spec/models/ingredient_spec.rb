@@ -12,11 +12,11 @@
 require 'rails_helper'
 
 RSpec.describe Ingredient do
-  it { should validate_presence_of(:name) }
+  it { is_expected.to validate_presence_of(:name) }
 
-  it { should have_many(:recipe_ingredients) }
-  it { should have_many(:recipes).through(:recipe_ingredients) }
+  it { is_expected.to have_many(:recipe_ingredients) }
+  it { is_expected.to have_many(:recipes).through(:recipe_ingredients) }
 
-  it { should have_many(:fridge_ingredients) }
-  it { should have_many(:fridges).through(:fridge_ingredients) }
+  it { is_expected.to have_many(:fridge_ingredients) }
+  it { is_expected.to have_many(:fridges).through(:fridge_ingredients) }
 end

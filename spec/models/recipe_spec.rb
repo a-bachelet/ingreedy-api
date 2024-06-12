@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: recipes
@@ -9,9 +11,9 @@
 #
 require 'rails_helper'
 
-RSpec.describe Recipe, type: :model do
-  it { should validate_presence_of(:name) }
+RSpec.describe Recipe do
+  it { is_expected.to validate_presence_of(:name) }
 
-  it { should have_many(:recipe_ingredients) }
-  it { should have_many(:ingredients).through(:recipe_ingredients) }
+  it { is_expected.to have_many(:recipe_ingredients) }
+  it { is_expected.to have_many(:ingredients).through(:recipe_ingredients) }
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: recipes
@@ -9,7 +11,7 @@
 #
 FactoryBot.define do
   factory :recipe do
-    name { "Mysterious Omelette" }
+    name { 'Mysterious Omelette' }
 
     transient do
       ingredients_count { 5 }

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: recipes
@@ -8,7 +10,7 @@
 #  updated_at :datetime         not null
 #
 class Recipe < ApplicationRecord
-  has_many :recipe_ingredients
+  has_many :recipe_ingredients, dependent: :destroy
   has_many :ingredients, through: :recipe_ingredients
 
   validates :name, presence: true

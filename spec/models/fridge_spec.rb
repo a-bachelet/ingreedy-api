@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fridges
@@ -8,7 +10,7 @@
 #
 require 'rails_helper'
 
-RSpec.describe Fridge, type: :model do
-  it { should have_many(:fridge_ingredients) }
-  it { should have_many(:ingredients).through(:fridge_ingredients) }
+RSpec.describe Fridge do
+  it { is_expected.to have_many(:fridge_ingredients) }
+  it { is_expected.to have_many(:ingredients).through(:fridge_ingredients) }
 end

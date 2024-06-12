@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fridges
@@ -7,6 +9,6 @@
 #  updated_at :datetime         not null
 #
 class Fridge < ApplicationRecord
-  has_many :fridge_ingredients
+  has_many :fridge_ingredients, dependent: :destroy
   has_many :ingredients, through: :fridge_ingredients
 end

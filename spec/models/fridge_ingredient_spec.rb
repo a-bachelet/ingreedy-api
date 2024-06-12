@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: fridge_ingredients
@@ -21,9 +23,9 @@
 #
 require 'rails_helper'
 
-RSpec.describe FridgeIngredient, type: :model do
-  it { should validate_presence_of(:quantity) }
+RSpec.describe FridgeIngredient do
+  it { is_expected.to validate_presence_of(:quantity) }
 
-  it { should belong_to(:fridge) }
-  it { should belong_to(:ingredient) }
+  it { is_expected.to belong_to(:fridge) }
+  it { is_expected.to belong_to(:ingredient) }
 end
