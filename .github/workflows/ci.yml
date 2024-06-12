@@ -57,12 +57,13 @@ jobs:
         bin/rails db:migrate
 
     - name: Tests execution
-      run: bundle exec rspec
+      run: bundle exec rspec -f j -o tmp/rspec_results.json -f p
 
-    - name: Tests coverage report
-      uses: joshmfrankel/simplecov-check-action@main
+    - name: Tests report
+      uses: SonicGarden/rspec-report-action@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        json-path: tmp/rspec_results.json
 
   deploy:
     environment: production
