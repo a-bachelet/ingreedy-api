@@ -29,37 +29,37 @@ jobs:
           --health-retries 5
 
     steps:
-      - name: Code checkout
-        uses: actions/checkout@v4
+    - name: Code checkout
+      uses: actions/checkout@v4
 
-      - name: Ruby setup
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3.1
+    - name: Ruby setup
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 3.3.1
 
-      - name: Bundle install
-        run: |
-          gem install bundler
-          bundle install
+    - name: Bundle install
+      run: |
+        gem install bundler
+        bundle install
 
-      - name: Rubocop lint
-        run: bundle exec rubocop
+    - name: Rubocop lint
+      run: bundle exec rubocop
 
-      - name: Reek analysis
-        run: bundle exec reek
+    - name: Reek analysis
+      run: bundle exec reek
 
-      - name: Bundler audit
-        run: bundle exec bundler-audit check --update
+    - name: Bundler audit
+      run: bundle exec bundler-audit check --update
 
-      - name: Database setup
-        run: |
-          bin/rails db:create
-          bin/rails db:migrate
+    - name: Database setup
+      run: |
+        bin/rails db:create
+        bin/rails db:migrate
 
-      - name: Tests execution
-        run: bundle exec rspec
+    - name: Tests execution
+      run: bundle exec rspec
 
-      - name: Tests coverage report
+    - name: Tests coverage report
       uses: joshmfrankel/simplecov-check-action@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
