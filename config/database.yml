@@ -1,18 +1,18 @@
 default: &default
   adapter: postgresql
-  host: 127.0.0.1
-  username: ingreedy
-  password: 1NGr33Dy
+  host: <%= ENV.fetch('PG_HOST') {'127.0.0.1'} %>
+  username: <%= ENV.fetch('PG_USER') {'ingreedy'} %>
+  password: <%= ENV.fetch('PG_PASS') {'1NGr33Dy'} %>
+  databse: <%= ENV.fetch('DB_NAME') {'ingreedy'} %>
   pool: 5
 
 development:
   <<: *default
-  database: ingreedy_dev
+  database: <%= ENV.fetch('DB_NAME') {'ingreedy'} + '_dev' %>
 
 test:
   <<: *default
-  database: ingreedy_test
+  database: <%= ENV.fetch('DB_NAME') {'ingreedy'} + '_test' %>
 
 production:
   <<: *default
-  database: ingreedy_prod
