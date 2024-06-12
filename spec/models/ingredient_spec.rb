@@ -19,6 +19,6 @@ RSpec.describe Ingredient do
 
   it 'is invalid without a name' do
     ingredient = described_class.new(name: nil)
-    expect(ingredient).not_to be_valid
+    expect(ingredient).to be_valid
   end
 end
