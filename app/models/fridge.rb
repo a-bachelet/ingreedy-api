@@ -1,16 +1,12 @@
-# frozen_string_literal: true
-
 # == Schema Information
 #
-# Table name: ingredients
+# Table name: fridges
 #
 #  id         :bigint           not null, primary key
-#  name       :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
-FactoryBot.define do
-  factory :ingredient do
-    name { 'Mysterious Egg' }
-  end
+class Fridge < ApplicationRecord
+  has_many :fridge_ingredients
+  has_many :ingredients, through: :fridge_ingredients
 end

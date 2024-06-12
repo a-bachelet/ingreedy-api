@@ -1,16 +1,15 @@
-# frozen_string_literal: true
-
 # == Schema Information
 #
-# Table name: ingredients
+# Table name: recipes
 #
 #  id         :bigint           not null, primary key
 #  name       :string
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #
-FactoryBot.define do
-  factory :ingredient do
-    name { 'Mysterious Egg' }
-  end
+class Recipe < ApplicationRecord
+  has_many :recipe_ingredients
+  has_many :ingredients, through: :recipe_ingredients
+
+  validates :name, presence: true
 end
