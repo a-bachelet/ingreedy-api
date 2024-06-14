@@ -98,9 +98,9 @@ def system_prompt
       ...
     }
 
-    Make sure ingredient names and units have both singular and plural form if they can !
-
     All slugs must be in kebab case !
+
+    Make sure ingredient names and units have both singular and plural form !
   STR
 end
 
@@ -213,13 +213,11 @@ def normalize_recipe(recipe)
 
   begin
     openai_result = openai.chat(parameters: prompt_parameters(message))
-  rescue Faraday::Error
-    openai_result = nil
+    result = openai_result.dig('choices', 0, 'message', 'tool_calls', 0, 'function', 'arguments')
+    JSON.parse(result)
+  rescue Faraday::Error, JSON::ParserError
+    nil
   end
-
-  result = openai_result&.dig('choices', 0, 'message', 'tool_calls', 0, 'function', 'arguments')
-
-  result && JSON.parse(result)
 end
 
 def import_recipe(normalized_recipe)
@@ -238,10 +236,9 @@ def find_or_initialize_recipe(normalized_recipe)
 end
 
 def set_recipe_attributes(recipe, normalized_recipe)
-  %w[name rate budget prep_time cook_time total_time image_url].each do |key|
-    recipe.assign_attribute(key.to_i, normalized_recipe[key])
-  end
+  attributes = %w[name rate budget prep_time cook_time total_time image_url].index_with { normalized_recipe[_1] }
 
+  recipe.assign_attributes(attributes)
   recipe.recipe_ingredients = build_recipe_ingredients(normalized_recipe)
   recipe.recipe_tags = build_recipe_tags(normalized_recipe)
 end
@@ -257,7 +254,7 @@ def build_recipe_ingredients(normalized_recipe)
       ingredient: Ingredient.find_or_initialize_by(names: normalized_ingredient['name']),
       quantity: normalized_ingredient['quantity']
     )
-  end
+  end.select(&:ingredient)
 end
 
 def build_recipe_tags(normalized_recipe)
