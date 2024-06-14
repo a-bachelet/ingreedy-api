@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: recipe_tags
@@ -20,7 +22,7 @@
 #
 require 'rails_helper'
 
-RSpec.describe RecipeTag, type: :model do
+RSpec.describe RecipeTag do
   subject { build(:recipe_tag) }
 
   it { is_expected.to belong_to(:recipe) }

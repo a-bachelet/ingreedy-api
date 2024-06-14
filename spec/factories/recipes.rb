@@ -7,11 +7,11 @@
 #  id         :bigint           not null, primary key
 #  budget     :enum             default("cheap"), not null
 #  cook_time  :integer          default(0), not null
-#  image_url  :string           not null
+#  image_url  :string           default(""), not null
 #  name       :string           not null
 #  prep_time  :integer          default(0), not null
 #  rate       :decimal(, )      default(0.0), not null
-#  slug       :string           not null
+#  slug       :string           default(""), not null
 #  total_time :integer          default(0), not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
@@ -36,15 +36,15 @@ FactoryBot.define do
     end
 
     recipe_ingredients do
-      Array.new(ingredients_count) {
+      Array.new(ingredients_count) do
         build(:recipe_ingredient, recipe: nil)
-      }
+      end
     end
 
     recipe_tags do
-      Array.new(1) {
+      Array.new(1) do
         build(:recipe_tag, recipe: nil)
-      }
+      end
     end
   end
 end

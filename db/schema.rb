@@ -66,13 +66,13 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "slug", null: false
+    t.string "slug", default: "", null: false
     t.decimal "rate", default: "0.0", null: false
     t.enum "budget", default: "cheap", null: false, enum_type: "recipe_budget"
     t.integer "prep_time", default: 0, null: false
     t.integer "cook_time", default: 0, null: false
     t.integer "total_time", default: 0, null: false
-    t.string "image_url", null: false
+    t.string "image_url", default: "", null: false
     t.index ["slug"], name: "index_recipes_on_slug", unique: true
   end
 

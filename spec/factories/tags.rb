@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: tags
@@ -14,7 +16,7 @@
 #
 FactoryBot.define do
   factory :tag do
-    name { "Plat principal" }
-    slug { "plat-principal" }
+    name { 'Plat principal' }
+    slug { 'plat-principal' }
   end
 end

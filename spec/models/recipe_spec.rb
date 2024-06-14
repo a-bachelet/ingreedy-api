@@ -7,11 +7,11 @@
 #  id         :bigint           not null, primary key
 #  budget     :enum             default("cheap"), not null
 #  cook_time  :integer          default(0), not null
-#  image_url  :string           not null
+#  image_url  :string           default(""), not null
 #  name       :string           not null
 #  prep_time  :integer          default(0), not null
 #  rate       :decimal(, )      default(0.0), not null
-#  slug       :string           not null
+#  slug       :string           default(""), not null
 #  total_time :integer          default(0), not null
 #  created_at :datetime         not null
 #  updated_at :datetime         not null

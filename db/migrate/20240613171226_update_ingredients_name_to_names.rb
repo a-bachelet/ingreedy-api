@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UpdateIngredientsNameToNames < ActiveRecord::Migration[7.1]
   def up
     add_column :ingredients, :names, :jsonb, default: { singular: '', plural: '' }.to_s
