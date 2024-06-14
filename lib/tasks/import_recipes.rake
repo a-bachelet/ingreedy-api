@@ -12,6 +12,8 @@ namespace :recipes do
     failures = 0
 
     recipes.each_with_index do |recipe, idx|
+      next if recipe_already_exists?(recipe)
+
       processed += 1
 
       tell_about_normalization(idx, total_count)
@@ -101,6 +103,8 @@ def system_prompt
     All slugs must be in kebab case !
 
     Make sure ingredient names and units have both singular and plural form !
+
+    Budgets must be one of ["cheap", "affordable", "medium", "high", "very_high", "luxurious"] !!!
   STR
 end
 
@@ -208,6 +212,11 @@ def prompt_parameters(message)
   }
 end
 
+def recipe_already_exists?(recipe)
+  slug = I18n.transliterate(recipe['name']).downcase.strip.gsub(/[^a-z0-9\s-]/, '').gsub(/\s+/, '-')
+  !!Recipe.find_by(slug:)
+end
+
 def normalize_recipe(recipe)
   message = { role: :user, content: recipe.to_s }
 
@@ -250,11 +259,11 @@ def build_recipe_ingredients(normalized_recipe)
 
   normalized_ingredients.map do |normalized_ingredient|
     RecipeIngredient.new(
-      unit: Unit.find_or_initialize_by(names: normalized_ingredient['unit']),
-      ingredient: Ingredient.find_or_initialize_by(names: normalized_ingredient['name']),
+      unit: Unit.first_or_create(names: normalized_ingredient['unit']),
+      ingredient: Ingredient.first_or_create(names: normalized_ingredient['name']),
       quantity: normalized_ingredient['quantity']
     )
-  end.select(&:ingredient)
+  end
 end
 
 def build_recipe_tags(normalized_recipe)
@@ -264,7 +273,7 @@ def build_recipe_tags(normalized_recipe)
 
   normalized_tags.map do |normalized_tag|
     RecipeTag.new(
-      tag: Tag.find_or_initialize_by(slug: normalized_tag['slug']) { _1.name = normalized_tag['name'] }
+      tag: Tag.first_or_create(slug: normalized_tag['slug']) { _1.name = normalized_tag['name'] }
     )
   end
 end

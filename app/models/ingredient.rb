@@ -10,8 +10,12 @@
 #  updated_at :datetime         not null
 #
 class Ingredient < ApplicationRecord
+  include PgSearch::Model
+
   has_many :recipe_ingredients, dependent: :destroy
   has_many :recipes, through: :recipe_ingredients
 
   validates :names, presence: true
+  
+  pg_search_scope :search, against: :names
 end
