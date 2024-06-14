@@ -5,7 +5,7 @@
 # Table name: fridge_ingredients
 #
 #  id            :bigint           not null, primary key
-#  quantity      :integer          not null
+#  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  fridge_id     :bigint           not null
@@ -28,8 +28,6 @@ require 'rails_helper'
 
 RSpec.describe FridgeIngredient do
   subject { build(:fridge_ingredient) }
-
-  it { is_expected.to validate_presence_of(:quantity) }
 
   it { is_expected.to belong_to(:fridge) }
   it { is_expected.to belong_to(:ingredient) }

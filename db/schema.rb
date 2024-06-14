@@ -21,7 +21,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
   create_table "fridge_ingredients", force: :cascade do |t|
     t.bigint "fridge_id", null: false
     t.bigint "ingredient_id", null: false
-    t.integer "quantity", null: false
+    t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "unit_id"
@@ -44,7 +44,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
   create_table "recipe_ingredients", force: :cascade do |t|
     t.bigint "recipe_id", null: false
     t.bigint "ingredient_id", null: false
-    t.integer "quantity", null: false
+    t.integer "quantity"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "unit_id"
@@ -85,7 +85,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
   end
 
   create_table "units", force: :cascade do |t|
-    t.string "names", default: "{:singular=>\"\", :plural=>\"\"}", null: false
+    t.jsonb "names", default: "{:singular=>\"\", :plural=>\"\"}", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

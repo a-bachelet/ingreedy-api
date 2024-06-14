@@ -5,7 +5,7 @@
 # Table name: fridge_ingredients
 #
 #  id            :bigint           not null, primary key
-#  quantity      :integer          not null
+#  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  fridge_id     :bigint           not null

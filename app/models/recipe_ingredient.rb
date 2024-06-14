@@ -5,7 +5,7 @@
 # Table name: recipe_ingredients
 #
 #  id            :bigint           not null, primary key
-#  quantity      :integer          not null
+#  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  ingredient_id :bigint           not null
@@ -28,6 +28,4 @@ class RecipeIngredient < ApplicationRecord
   belongs_to :recipe
   belongs_to :ingredient
   belongs_to :unit, optional: true
-
-  validates :quantity, presence: true
 end

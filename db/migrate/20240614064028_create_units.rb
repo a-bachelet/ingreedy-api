@@ -3,7 +3,7 @@
 class CreateUnits < ActiveRecord::Migration[7.1]
   def change
     create_table :units do |t|
-      t.string :names, null: false, default: { singular: '', plural: '' }.to_s
+      t.jsonb :names, null: false, default: { singular: '', plural: '' }.to_s
 
       t.timestamps
     end

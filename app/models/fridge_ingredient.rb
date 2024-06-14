@@ -5,7 +5,7 @@
 # Table name: fridge_ingredients
 #
 #  id            :bigint           not null, primary key
-#  quantity      :integer          not null
+#  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
 #  fridge_id     :bigint           not null
@@ -28,6 +28,4 @@ class FridgeIngredient < ApplicationRecord
   belongs_to :fridge
   belongs_to :ingredient
   belongs_to :unit, optional: true
-
-  validates :quantity, presence: true
 end
