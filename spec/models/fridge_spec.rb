@@ -11,6 +11,8 @@
 require 'rails_helper'
 
 RSpec.describe Fridge do
+  subject { build(:fridge) }
+
   it { is_expected.to have_many(:fridge_ingredients) }
   it { is_expected.to have_many(:ingredients).through(:fridge_ingredients) }
 end

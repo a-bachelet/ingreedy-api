@@ -3,7 +3,7 @@ default: &default
   host: <%= ENV.fetch('PG_HOST') {'127.0.0.1'} %>
   username: <%= ENV.fetch('PG_USER') {'ingreedy'} %>
   password: <%= ENV.fetch('PG_PASS') {'1NGr33Dy'} %>
-  databse: <%= ENV.fetch('DB_NAME') {'ingreedy'} %>
+  database: <%= ENV.fetch('DB_NAME') {'ingreedy'} %>
   pool: 5
 
 development:
