@@ -3,313 +3,252 @@
 namespace :recipes do
   desc 'Import recipes from a static JSON file'
   task import: :environment do
-    recipes = fetch_recipes
+    setup_parsing_helpers
+    
+    unprocessed_recipes = load_recipes_from_json_file
 
-    total_count = recipes.count
+    ignore_duplicates!(unprocessed_recipes)
 
-    processed = 0
-    success = 0
+    total_count = unprocessed_recipes.count
+    successes = 0
     failures = 0
 
-    recipes.each_with_index do |recipe, idx|
+    puts "🤖 'Recipes Import Script' starting..."
+    puts "🤖 #{total_count} recipes can be imported !"
+    puts ''
+
+    unprocessed_recipes.each_with_index do |unprocessed_recipe, index|      
       begin
-        next if recipe_already_exists?(recipe)
-
-        processed += 1
-
-        tell_about_normalization(idx, total_count)
-        normalized_recipe = normalize_recipe(recipe)
-        tell_about_normalization_success(normalized_recipe, idx, total_count)
-        puts ''
-
-        next unless normalized_recipe
-
-        tell_about_import(idx, total_count)
-        imported_recipe = import_recipe(normalized_recipe)
-        tell_about_import_success(imported_recipe, idx, total_count) ? success += 1 : failures += 1
-        puts ''
-        puts '--------'
-        puts ''
+        puts "🧠 Normalizing recipe '#{index + 1}/#{total_count}'..."
+        normalized_recipe = normalize_recipe(unprocessed_recipe)
+        puts "✅ Recipe '#{index + 1}/#{total_count}' normalized successfully !"
       rescue StandardError => err
+        puts "❌ Error normalizing recipe '#{index + 1}/#{total_count}'. (#{err.class})"
         failures += 1
       end
+
+      unless normalized_recipe
+        puts ''
+        next
+      end
+
+      begin
+        puts "🧑‍🍳 Importing recipe '#{index + 1}/#{total_count}'..."
+        imported_recipe = import_recipe(normalized_recipe)
+
+        if imported_recipe.errors.any?
+          puts "❌ Error importing recipe '#{index + 1}/#{total_count}'. (INVALID )"
+          failures += 1
+        else
+          puts "✅ Recipe '#{index + 1}/#{total_count}' imported successfully !"
+          successes += 1
+        end
+      rescue StandardError => err
+        puts "❌ Error importing recipe '#{index + 1}/#{total_count}'. (#{err.class})"
+        failures += 1
+      end
+
+      puts '' unless index + 1 == total_count
     end
 
-    tell_about_operation(total_count, processed, success, failures)
+    if failures == 0
+      puts "🤖 'Recipes Import Script' finished successfully ! 🍾"
+    else
+      puts "🤖 'Recipes Import Script' finished with errors... 🔥"
+    end
+
+    puts "🏭 #{successes + failures} recipes processed"
+    puts "✅ #{successes} recipes succeded"
+    puts "❌ #{failures} recipes failed"
   end
 end
 
-def openai
-  @openai ||= OpenAI::Client.new(access_token: ENV.fetch('OPENAI_KEY'))
-end
-
-def system_prompt
-  <<-STR
-    You are a JSON parser, you identify as a JSON parser.
-
-    Your role is to help us to extract some informations
-    from food recipes formatted in JSON.
-
-    I will give you JSON objects in the form of recipes data,
-    for example :
-
-    {
-      "rate": "5",
-      "author_tip": "",
-      "budget": "bon marché",
-      "prep_time": "15 min",
-      "ingredients": [
-        "600g de pâte à crêpe",
-        "1/2 orange",
-        "1/2 banane",
-        "1/2 poire pochée",
-        "1poignée de framboises",
-        "75g de Nutella®",
-        "1poignée de noisettes torréfiées",
-        "1/2poignée d'amandes concassées",
-        "1cuillère à café d'orange confites en dés",
-        "2cuillères à café de noix de coco rapée",
-        "1/2poignée de pistache concassées",
-        "2cuillères à soupe d'amandes effilées"
-      ],
-      "name": "6 ingrédients que l’on peut ajouter sur une crêpe au Nutella®",
-      "author": "Nutella",
-      "difficulty": "très facile",
-      "people_quantity": "6",
-      "cook_time": "10 min",
-      "tags": [
-        "Crêpe",
-        "Crêpes sucrées",
-        "Végétarien",
-        "Dessert"
-      ],
-      "total_time": "25 min",
-      "image": "https://assets.afcdn.com/recipe/20171006/72810_w420h344c1cx2544cy1696cxt0cyt0cxb5088cyb3392.jpg",
-      "nb_comments": "1"
-    }
-
-    What i want from you is to normalize those JSON recipes data in the same format each time,
-    avoiding duplicated informations, extracting more data from sentences.
-
-    For example, for ingredients, here, i want :
-
-    {
-      ...
-      ingredients: [
-        { name: { singular: 'pâte à crêpe', plural: 'pâte à crêpe' }, quantity: 600, unit: { singular: 'g', plural: 'g' } },
-        { name: { singular: 'noisette torréfiée', plural: 'noisettes torréfiées' }, quantity: 1, unit: { singular: 'poignée', plural: 'poignées' } },
-        { name: { singular: 'noix de coco rapée', plural: 'noix de coco rapées' }, quantity: '2', unit: { singular: 'cuillère à café', plural: 'cuillères à café' } }
-        ...
-      ]
-      ...
-    }
-
-    All slugs must be in kebab case !
-
-    Make sure ingredient names and units have both singular and plural form !
-
-    Budgets must be one of ["cheap", "affordable", "medium", "high", "very_high", "luxurious"] !!!
-  STR
-end
-
-def system_message
-  { role: :system, content: system_prompt }
-end
-
-def system_function # rubocop:disable Metrics/MethodLength
-  {
-    type: 'function',
-    function: {
-      name: 'parse_recipe_json_data',
-      description: 'Parses a recipe json data',
-      parameters: {
-        type: :object,
-        properties: {
-          name: {
-            type: :string,
-            description: 'The recipe name'
-          },
-          slug: {
-            type: :string,
-            description: 'The slugified recipe name in kebab case'
-          },
-          rate: {
-            type: :number,
-            description: 'The recipe rate from 0 to 5'
-          },
-          budget: {
-            type: :string,
-            description: 'The recipe budget estimation',
-            enum: %w[cheap affordable medium high very_high luxurious]
-          },
-          prep_time: {
-            type: :integer,
-            description: 'The recipe initial preparation time in minutes'
-          },
-          cook_time: {
-            type: :integer,
-            description: 'The recipe cooking time in minutes'
-          },
-          total_time: {
-            type: :integer,
-            description: 'Addition of prep_time and cook_time'
-          },
-          image_url: {
-            type: :string,
-            description: 'URL of recipe image'
-          },
-          ingredients: {
-            type: :array,
-            description: 'The recipe ingredients list',
-            items: {
-              type: :object,
-              properties: {
-                name: {
-                  type: :object,
-                  properties: {
-                    singular: { type: :string },
-                    plural: { type: :string }
-                  }
-                },
-                quantity: { type: :integer },
-                unit: {
-                  type: :object,
-                  properties: {
-                    singular: { type: :string },
-                    plural: { type: :string }
-                  }
-                }
-              }
-            }
-          },
-          tags: {
-            type: :array,
-            description: 'The recipe tags list',
-            items: {
-              type: :object,
-              properties: {
-                name: { type: :string },
-                slug: { type: :string }
-              }
-            }
-          }
-        },
-        required: %w[
-          name slug rate budget prep_time cook_time
-          total_time image ingredients tags
-        ]
-      }
-    }
+def setup_parsing_helpers
+  @time_regex = /^(?:^|(\d+)j)?(?:^|(\d+)h)?(?:^|(\d+)(?:m|mn|min|))?$/
+  
+  @raw_keys = %w[rate author_tip name author people_quantity image]
+  
+  @budgets_matrix = {
+    'bon marché' => 'affordable',
+    'coût moyen' => 'medium',
+    'assez cher' => 'high'
+  }
+  
+  @difficulties_matrix = {
+    'très facile' => 'very_easy',
+    'facile' => 'easy',
+    'niveau moyen' => 'medium',
+    'difficile' => 'difficult'
   }
 end
 
-def fetch_recipes
-  JSON.parse(File.read('static/recipes-fr.json')).reject { _1['image'].empty? }
-end
-
-def prompt_parameters(message)
-  {
-    model: 'gpt-3.5-turbo',
-    messages: [system_message, message],
-    tools: [system_function],
-    tool_choice: :required
-  }
-end
-
-def recipe_already_exists?(recipe)
-  slug = I18n.transliterate(recipe['name']).downcase.strip.gsub(/[^a-z0-9\s-]/, '').gsub(/\s+/, '-')
-  !!Recipe.find_by(slug:)
-end
-
-def normalize_recipe(recipe)
-  message = { role: :user, content: recipe.to_s }
-
-  begin
-    openai_result = openai.chat(parameters: prompt_parameters(message))
-    result = openai_result.dig('choices', 0, 'message', 'tool_calls', 0, 'function', 'arguments')
-    JSON.parse(result)
-  rescue Faraday::Error, JSON::ParserError
-    nil
+def load_recipes_from_json_file
+  filename = 'static/recipes-fr.json'
+  file = File.read(filename)
+  
+  recipes = JSON.parse(file)
+  
+  recipes.reject! do |recipe|
+    recipe['image'].nil? || recipe['image']&.empty? ||
+    recipe['ingredients'].nil? || recipe['ingredients']&.empty? ||
+    !@time_regex.match?(recipe['prep_time'].delete(' ').downcase) ||
+    !@time_regex.match?(recipe['cook_time'].delete(' ').downcase) ||
+    !@time_regex.match?(recipe['total_time'].delete(' ').downcase)
   end
+end
+
+def ignore_duplicates!(unprocessed_recipes)
+  unprocessed_recipes.reject! { !!Recipe.find_by(name: _1['name']) }
+end
+
+def normalize_recipe(unprocessed_recipe)
+  normalized_recipe = {}
+  normalize_raw_keys(unprocessed_recipe, normalized_recipe)
+  normalize_slug(unprocessed_recipe, normalized_recipe)
+  normalize_budget(unprocessed_recipe, normalized_recipe)
+  normalize_difficulty(unprocessed_recipe, normalized_recipe)
+  normalize_tags(unprocessed_recipe, normalized_recipe)
+  normalize_times(unprocessed_recipe, normalized_recipe)
+  normalize_ingredients(unprocessed_recipe, normalized_recipe)
+  normalized_recipe
+end
+
+def normalize_raw_keys(unprocessed_recipe, normalized_recipe)
+  @raw_keys.each { |key| normalized_recipe[key.to_sym] = unprocessed_recipe[key] }
+end
+
+def normalize_slug(unprocessed_recipe, normalized_recipe)
+  normalized_recipe[:slug] = slugify(unprocessed_recipe['name'])
+end
+
+def normalize_budget(unprocessed_recipe, normalized_recipe)
+  normalized_recipe[:budget] = @budgets_matrix[unprocessed_recipe['budget'].downcase]
+end
+
+def normalize_difficulty(unprocessed_recipe, normalized_recipe)
+  normalized_recipe[:difficulty] = @difficulties_matrix[unprocessed_recipe['difficulty'].downcase]
+end
+
+def normalize_tags(unprocessed_recipe, normalized_recipe)
+  normalized_recipe[:tags] = unprocessed_recipe['tags'].index_with { slugify(_1) }
+end
+
+def normalize_times(unprocessed_recipe, normalized_recipe)
+  parsed_prep_time = @time_regex.match(unprocessed_recipe['prep_time'].delete(' ').downcase)[1..3]
+  parsed_cook_time = @time_regex.match(unprocessed_recipe['cook_time'].delete(' ').downcase)[1..3]
+  parsed_total_time = @time_regex.match(unprocessed_recipe['total_time'].delete(' ').downcase)[1..3]
+
+  prep_time_in_minutes = duration_to_minutes *parsed_prep_time
+  cook_time_in_minutes = duration_to_minutes *parsed_cook_time
+  total_time_in_minutes = duration_to_minutes *parsed_total_time
+
+  normalized_recipe[:prep_time] = prep_time_in_minutes
+  normalized_recipe[:cook_time] = cook_time_in_minutes
+  normalized_recipe[:total_time] = total_time_in_minutes
+end
+
+def normalize_ingredients(unprocessed_recipe, normalized_recipe)
+  ingredients_normalization_result = make_ingredients_usable(unprocessed_recipe['ingredients'].to_s)
+  normalized_ingredients = JSON.parse(ingredients_normalization_result.dig('choices', 0, 'message', 'content'))
+  normalized_recipe[:ingredients] = normalized_ingredients['ingredients']
 end
 
 def import_recipe(normalized_recipe)
-  recipe = find_or_initialize_recipe(normalized_recipe)
-
-  return recipe unless recipe.new_record?
-
-  set_recipe_attributes(recipe, normalized_recipe)
-
-  recipe.save
-  recipe
+  Recipe.create(
+    name: normalized_recipe[:name],
+    slug: normalized_recipe[:slug],
+    rate: normalized_recipe[:rate],
+    author_name: normalized_recipe[:author],
+    author_tip: normalized_recipe[:author_tip],
+    people_quantity: normalized_recipe[:people_quantity],
+    budget: normalized_recipe[:budget],
+    difficulty: normalized_recipe[:difficulty],
+    image_url: normalized_recipe[:image],
+    prep_time: normalized_recipe[:prep_time],
+    cook_time: normalized_recipe[:cook_time],
+    total_time: normalized_recipe[:total_time],
+    tags: find_or_create_tags(normalized_recipe[:tags]),
+    recipe_ingredients: find_or_create_recipe_ingredients(normalized_recipe[:ingredients])
+  )
 end
 
-def find_or_initialize_recipe(normalized_recipe)
-  Recipe.find_or_initialize_by(slug: normalized_recipe['slug'])
+def find_or_create_tags(normalized_tags)
+  normalized_tags.map do |tag_name, tag_slug|
+    Tag.find_or_create_by(name: tag_name, slug: tag_slug)
+  end
 end
 
-def set_recipe_attributes(recipe, normalized_recipe)
-  attributes = %w[name rate budget prep_time cook_time total_time image_url].index_with { normalized_recipe[_1] }
-
-  recipe.assign_attributes(attributes)
-  recipe.recipe_ingredients = build_recipe_ingredients(normalized_recipe)
-  recipe.recipe_tags = build_recipe_tags(normalized_recipe)
+def find_or_create_recipe_ingredients(normalized_ingredients)
+  normalized_ingredients.map do |ingredient|
+    ingredient = find_or_create_ingredient(ingredient['name'])
+    unit = find_or_create_unit(ingredient['unit'])
+    
+    RecipeIngredient.new(ingredient:, quantity: ingredient['quantity'], unit:)
+  end
 end
 
-def build_recipe_ingredients(normalized_recipe)
-  normalized_ingredients = normalized_recipe['ingredients'] || []
-
-  return [] if normalized_ingredients.empty?
-
-  normalized_ingredients.map do |normalized_ingredient|
-    RecipeIngredient.new(
-      unit: Unit.where(names: normalized_ingredient['unit']).first_or_create,
-      ingredient: Ingredient.where(names: normalized_ingredient['name']).first_or_create,
-      quantity: normalized_ingredient['quantity']
-    )
-  end.reject { !_1.ingredient }
+def find_or_create_ingredient(normalized_ingredient)
+  Ingredient.find_or_create_by(names: normalized_ingredient)
 end
 
-def build_recipe_tags(normalized_recipe)
-  normalized_tags = normalized_recipe['tags'] || []
-
-  return [] if normalized_tags.empty?
-
-  normalized_tags.map do |normalized_tag|
-    RecipeTag.new(
-      tag: Tag.where(slug: normalized_tag['slug']).first_or_create { _1.name = normalized_tag['name'] }
-    )
-  end.reject { !_1.tag }
+def find_or_create_unit(normalized_unit)
+  Unit.find_or_create_by(names: normalized_unit)
 end
 
-def tell_about_normalization(index, total)
-  puts "🧠 Normalizing recipe '#{index + 1}/#{total}'..."
+def slugify(str)
+  str.downcase.gsub(/[^a-z0-9]+/, '-').gsub(/\A-|-\z/, '')
 end
 
-def tell_about_normalization_success(normalization, index, total)
-  success = "✅ Recipe '#{index + 1}/#{total}' normalized successfully !"
-  failure = "❌ Error normalizing recipe '#{index + 1}/#{total}'."
+def duration_to_minutes(days, hours, minutes)
+  days_minutes = (days.to_i || 0) * 24 * 60
+  hours_minutes = (hours.to_i || 0) * 60
+  minutes = minutes.to_i || 0
 
-  puts normalization ? success : failure
-
-  !!normalization
+  days_minutes + hours_minutes + minutes
 end
 
-def tell_about_import(index, total)
-  puts "🧑‍🍳 Importing recipe '#{index + 1}/#{total}'..."
-end
+def make_ingredients_usable(message)
+  system_prompt = <<-STR
+    You are a JSON parser, you identify as a JSON parser.
+    Your role is to help us to extract ingredients informations from food recipes ingredients list.
+    I will give you JSON objects that represent food recipes ingredients list.
+    
+    For example :
+    [
+    "600g de pâte à crêpe",
+    "1/2 orange",
+    "1/2 banane",
+    "1/2 poire pochée",
+    "1poignée de framboises",
+    "75g de Nutella®",
+    "1poignée de noisettes torréfiées",
+    "1/2poignée d'amandes concassées",
+    "1cuillère à café d'orange confites en dés",
+    "2cuillères à café de noix de coco rapée",
+    "1/2poignée de pistache concassées",
+    "2cuillères à soupe d'amandes effilées"
+    ]
+    
+    For each ingredient of the list, i want three informations : the name, the quantity, and the unit.
+    Every ingredient will be exposed in french.
+    
+    I want you to always give me results with form of { name: { singular: string, plural: string }, quantity: integer, unit: { singular: string, plural: string } }
+    
+    Every plural form of ingredient name or ingredient unit must be the french plural form of it.
+  STR
 
-def tell_about_import_success(import, index, total)
-  success = "✅ Recipe '#{index + 1}/#{total}' imported successfully !"
-  failure = "❌ Error importing recipe '#{index + 1}/#{total}'."
+  messages = [
+    { role: :system, content: system_prompt},
+    { role: :user, content: message }
+  ]
+  
+  openai = OpenAI::Client.new(access_token: ENV.fetch('OPENAI_KEY'))
+  
+  parameters = {
+    model: 'gpt-3.5-turbo',
+    messages:,
+    response_format:{ type: :json_object }
+  }
 
-  puts import&.errors&.empty? ? success : failure
-
-  !!import
-end
-
-def tell_about_operation(total, processed, success, failures)
-  puts "Process #{processed}/#{total} recipes 💪"
-  puts "#{success} Success ✅"
-  puts "#{failures} Failures ❌"
+  openai.chat(parameters:)
 end

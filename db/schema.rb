@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_14_131154) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_15_194908) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
   # Custom types defined in this database.
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "recipe_budget", ["cheap", "affordable", "medium", "high", "very_high", "luxurious"]
+  create_enum "recipe_difficulty", ["very_easy", "easy", "medium", "difficult"]
 
   create_table "fridge_ingredients", primary_key: ["fridge_id", "ingredient_id"], force: :cascade do |t|
     t.bigint "fridge_id", null: false
@@ -73,6 +74,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_131154) do
     t.integer "cook_time", default: 0, null: false
     t.integer "total_time", default: 0, null: false
     t.string "image_url", default: "", null: false
+    t.string "author_name", default: "Ingreedy", null: false
+    t.string "author_tip"
+    t.integer "people_quantity", default: 1, null: false
+    t.enum "difficulty", default: "medium", null: false, enum_type: "recipe_difficulty"
     t.index ["slug"], name: "index_recipes_on_slug", unique: true
   end
 
