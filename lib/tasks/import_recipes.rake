@@ -115,7 +115,7 @@ end
 
 def normalize_raw_keys(unprocessed_recipe, normalized_recipe)
   @raw_keys.each { |key| normalized_recipe[key.to_sym] = unprocessed_recipe[key] }
-  normalized_recipe[:rate] ||= 2.5
+  normalized_recipe[:rate] = 2.5 unless normalized_recipe[:rate] && normalized_recipe[:rate] != ''
 end
 
 def normalize_slug(unprocessed_recipe, normalized_recipe)
