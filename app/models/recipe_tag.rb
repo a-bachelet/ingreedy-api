@@ -4,11 +4,10 @@
 #
 # Table name: recipe_tags
 #
-#  id         :bigint           not null, primary key
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
-#  recipe_id  :bigint           not null
-#  tag_id     :bigint           not null
+#  recipe_id  :bigint           not null, primary key
+#  tag_id     :bigint           not null, primary key
 #
 # Indexes
 #
@@ -23,4 +22,6 @@
 class RecipeTag < ApplicationRecord
   belongs_to :recipe
   belongs_to :tag
+
+  self.primary_key = [:recipe_id, :tag_id]
 end

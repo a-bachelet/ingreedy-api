@@ -4,12 +4,11 @@
 #
 # Table name: recipe_ingredients
 #
-#  id            :bigint           not null, primary key
 #  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
-#  ingredient_id :bigint           not null
-#  recipe_id     :bigint           not null
+#  ingredient_id :bigint           not null, primary key
+#  recipe_id     :bigint           not null, primary key
 #  unit_id       :bigint
 #
 # Indexes

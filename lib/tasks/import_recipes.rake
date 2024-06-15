@@ -12,23 +12,27 @@ namespace :recipes do
     failures = 0
 
     recipes.each_with_index do |recipe, idx|
-      next if recipe_already_exists?(recipe)
+      begin
+        next if recipe_already_exists?(recipe)
 
-      processed += 1
+        processed += 1
 
-      tell_about_normalization(idx, total_count)
-      normalized_recipe = normalize_recipe(recipe)
-      tell_about_normalization_success(normalized_recipe, idx, total_count)
-      puts ''
+        tell_about_normalization(idx, total_count)
+        normalized_recipe = normalize_recipe(recipe)
+        tell_about_normalization_success(normalized_recipe, idx, total_count)
+        puts ''
 
-      next unless normalized_recipe
+        next unless normalized_recipe
 
-      tell_about_import(idx, total_count)
-      imported_recipe = import_recipe(normalized_recipe)
-      tell_about_import_success(imported_recipe, idx, total_count) && failures += 1
-      puts ''
-      puts '--------'
-      puts ''
+        tell_about_import(idx, total_count)
+        imported_recipe = import_recipe(normalized_recipe)
+        tell_about_import_success(imported_recipe, idx, total_count) ? success += 1 : failures += 1
+        puts ''
+        puts '--------'
+        puts ''
+      rescue StandardError => err
+        failures += 1
+      end
     end
 
     tell_about_operation(total_count, processed, success, failures)
@@ -259,11 +263,11 @@ def build_recipe_ingredients(normalized_recipe)
 
   normalized_ingredients.map do |normalized_ingredient|
     RecipeIngredient.new(
-      unit: Unit.first_or_create(names: normalized_ingredient['unit']),
-      ingredient: Ingredient.first_or_create(names: normalized_ingredient['name']),
+      unit: Unit.where(names: normalized_ingredient['unit']).first_or_create,
+      ingredient: Ingredient.where(names: normalized_ingredient['name']).first_or_create,
       quantity: normalized_ingredient['quantity']
     )
-  end
+  end.reject { !_1.ingredient }
 end
 
 def build_recipe_tags(normalized_recipe)
@@ -273,9 +277,9 @@ def build_recipe_tags(normalized_recipe)
 
   normalized_tags.map do |normalized_tag|
     RecipeTag.new(
-      tag: Tag.first_or_create(slug: normalized_tag['slug']) { _1.name = normalized_tag['name'] }
+      tag: Tag.where(slug: normalized_tag['slug']).first_or_create { _1.name = normalized_tag['name'] }
     )
-  end
+  end.reject { !_1.tag }
 end
 
 def tell_about_normalization(index, total)
@@ -299,7 +303,7 @@ def tell_about_import_success(import, index, total)
   success = "✅ Recipe '#{index + 1}/#{total}' imported successfully !"
   failure = "❌ Error importing recipe '#{index + 1}/#{total}'."
 
-  puts import ? success : failure
+  puts import&.errors&.empty? ? success : failure
 
   !!import
 end

@@ -4,12 +4,11 @@
 #
 # Table name: fridge_ingredients
 #
-#  id            :bigint           not null, primary key
 #  quantity      :integer
 #  created_at    :datetime         not null
 #  updated_at    :datetime         not null
-#  fridge_id     :bigint           not null
-#  ingredient_id :bigint           not null
+#  fridge_id     :bigint           not null, primary key
+#  ingredient_id :bigint           not null, primary key
 #  unit_id       :bigint
 #
 # Indexes
@@ -28,4 +27,6 @@ class FridgeIngredient < ApplicationRecord
   belongs_to :fridge
   belongs_to :ingredient
   belongs_to :unit, optional: true
+
+  self.primary_key = [:fridge_id, :ingredient_id]
 end

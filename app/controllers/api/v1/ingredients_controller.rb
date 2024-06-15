@@ -5,7 +5,7 @@ module Api
     class IngredientsController < ApplicationController
       include Pagy::Backend
 
-      rescue_from Pagy::OverflowError, :with => :page_not_found
+      rescue_from Pagy::OverflowError, :with => :not_found
 
       SORT_KEYS = %w[names].freeze
       SORT_DIRECTIONS = %w[asc desc].freeze
@@ -57,8 +57,8 @@ module Api
         Ingredient.order(sort_key.to_sym => sort_direction.to_sym)
       end
 
-      def page_not_found
-        render json: { error: 'Page not found.' }, status: 404
+      def not_found
+        raise ActionController::RoutingError.new("Not Found")
       end
     end
   end

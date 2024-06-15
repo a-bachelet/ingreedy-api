@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_14_131154) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -18,7 +18,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
   # Note that some types may not work with other database engines. Be careful if changing database.
   create_enum "recipe_budget", ["cheap", "affordable", "medium", "high", "very_high", "luxurious"]
 
-  create_table "fridge_ingredients", force: :cascade do |t|
+  create_table "fridge_ingredients", primary_key: ["fridge_id", "ingredient_id"], force: :cascade do |t|
     t.bigint "fridge_id", null: false
     t.bigint "ingredient_id", null: false
     t.integer "quantity"
@@ -41,7 +41,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
     t.jsonb "names", default: "{:singular=>\"\", :plural=>\"\"}", null: false
   end
 
-  create_table "recipe_ingredients", force: :cascade do |t|
+  create_table "recipe_ingredients", primary_key: ["recipe_id", "ingredient_id"], force: :cascade do |t|
     t.bigint "recipe_id", null: false
     t.bigint "ingredient_id", null: false
     t.integer "quantity"
@@ -53,7 +53,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_14_064028) do
     t.index ["unit_id"], name: "index_recipe_ingredients_on_unit_id"
   end
 
-  create_table "recipe_tags", force: :cascade do |t|
+  create_table "recipe_tags", primary_key: ["recipe_id", "tag_id"], force: :cascade do |t|
     t.bigint "recipe_id", null: false
     t.bigint "tag_id", null: false
     t.datetime "created_at", null: false
