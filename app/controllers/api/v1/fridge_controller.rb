@@ -6,7 +6,7 @@ module Api
       def list_ingredients
         render json: { ingredients: fridge.fridge_ingredients.to_json_list }
       end
-      
+
       def add_ingredient
         ingredient = Ingredient.find(add_ingredient_params[:id])
         quantity = add_ingredient_params[:quantity]
