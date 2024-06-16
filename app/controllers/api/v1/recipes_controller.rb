@@ -27,7 +27,7 @@ module Api
         render json: { recipes: @records.to_json_list, pagination: }
       end
 
-      def search
+      def search # rubocop:disable Metrics/MethodLength
         params[:search] || ''
 
         @records = recipes.search(params[:search])

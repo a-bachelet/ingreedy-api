@@ -65,15 +65,15 @@ class Recipe < ApplicationRecord
     }
   )
 
-  def self.to_json_list
-    author_sql = <<-SQL
+  def self.to_json_list # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    author_sql = <<-SQL.squish
       JSON_BUILD_OBJECT(
         'name', recipes.author_name,
         'tip', recipes.author_tip
       ) AS author
     SQL
 
-    times_sql = <<-SQL
+    times_sql = <<-SQL.squish
       JSON_BUILD_OBJECT(
         'preparation', recipes.prep_time,
         'cooking', recipes.cook_time,
@@ -81,7 +81,7 @@ class Recipe < ApplicationRecord
       ) AS times
     SQL
 
-    ingredients_sql = <<-SQL
+    ingredients_sql = <<-SQL.squish
       JSON_AGG(JSON_BUILD_OBJECT(
         'names', ingredients.names,
         'quantity', recipe_ingredients.quantity,
@@ -89,8 +89,8 @@ class Recipe < ApplicationRecord
       )) AS ingredients
     SQL
 
-    data = self
-      .joins('INNER JOIN recipe_ingredients ON recipe_ingredients.recipe_id = recipes.id')
+    data =
+      joins('INNER JOIN recipe_ingredients ON recipe_ingredients.recipe_id = recipes.id')
       .joins('INNER JOIN ingredients ON ingredients.id = recipe_ingredients.ingredient_id')
       .joins('LEFT OUTER JOIN units ON units.id = recipe_ingredients.unit_id')
       .group(:id, :name, :slug, :rate, :budget, :people_quantity, :difficulty, :image_url,
