@@ -45,7 +45,15 @@ module Api
         render json: { recipes: Recipe.from(@records, :recipes).to_json_list, pagination: }
       end
 
-      def suggest; end
+      def suggest
+         suggestion = Suggestion::CreateService.call(suggest_params)
+
+         if suggestion.invalid? || suggestion.errors.any?
+          render json: { errors: suggestion.errors }, status: :unprocessable_entity
+        else
+          render json: { suggestion: }, status: :ok
+        end
+      end
 
       private
 
@@ -65,6 +73,10 @@ module Api
 
       def not_found
         raise ActionController::RoutingError, 'Not Found'
+      end
+
+      def suggest_params
+        params.require(:suggestion).permit(:perfect_match_only, ingredients: %i[id, quantity, unit_id])
       end
     end
   end
