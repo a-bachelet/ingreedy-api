@@ -31,4 +31,13 @@ class FridgeIngredient < ApplicationRecord
   self.primary_key = %i[fridge_id ingredient_id]
 
   validates :ingredient_id, uniqueness: { scope: :fridge_id, message: 'Ingredient is already in the fridge.' } # rubocop:disable Rails/I18nLocaleTexts, Rails/UniqueValidationWithoutIndex
+
+  def self.to_json_list
+    data = joins(:ingredient)
+      .left_joins(:unit)
+      .select(:ingredient_id, :quantity, :unit_id, 
+              'ingredients.names AS ingredient_names',
+              'units.names AS unit_names'
+             )
+  end
 end

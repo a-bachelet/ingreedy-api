@@ -3,6 +3,10 @@
 module Api
   module V1
     class FridgeController < ApplicationController
+      def list_ingredients
+        render json: { ingredients: fridge.fridge_ingredients.to_json_list }
+      end
+      
       def add_ingredient
         ingredient = Ingredient.find(add_ingredient_params[:id])
         quantity = add_ingredient_params[:quantity]
@@ -45,7 +49,7 @@ module Api
       private
 
       def fridge
-        Fridge.first || Fridge.create
+        Fridge.first_or_create
       end
 
       def add_ingredient_params
