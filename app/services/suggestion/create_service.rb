@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class Suggestion
-  class CreateService
+  class CreateService # rubocop:disable Metrics/ClassLength
     class << self
-      delegate :call, :to => :new
+      delegate :call, to: :new
     end
 
     def call(params)
@@ -19,8 +21,6 @@ class Suggestion
     end
 
     private
-
-    def initialize; end
 
     def parse_ingredients(ingredients)
       ingredients.map do |ingredient|
@@ -52,14 +52,14 @@ class Suggestion
       unit_matches_query = build_unit_matches_query
       ingredient_matches_query = build_ingredient_matches_query
 
-      recipes_query = build_recipes_query(
+      build_recipes_query(
         suggestion, available_ingredients_query, full_perfect_matches_query,
         partial_perfect_matches_query, unit_matches_query, ingredient_matches_query
       )
     end
 
     def build_available_ingredients_query(suggestion)
-      <<-SQL
+      <<-SQL.squish
         SELECT
           i.id AS ingredient_id,
           i.quantity AS quantity,
@@ -71,8 +71,8 @@ class Suggestion
       SQL
     end
 
-    def build_full_perfect_matches_query
-      <<-SQL
+    def build_full_perfect_matches_query # rubocop:disable Metrics/MethodLength
+      <<-SQL.squish
         SELECT R.id, COUNT(RI.ingredient_id) AS full_perfect_match_count
         FROM recipes R
         LEFT OUTER JOIN recipe_ingredients RI
@@ -88,8 +88,8 @@ class Suggestion
       SQL
     end
 
-    def build_partial_perfect_matches_query
-      <<-SQL
+    def build_partial_perfect_matches_query # rubocop:disable Metrics/MethodLength
+      <<-SQL.squish
         SELECT R.id, COUNT(RI.ingredient_id) AS partial_perfect_match_count
         FROM recipes R
         JOIN recipe_ingredients RI
@@ -104,8 +104,8 @@ class Suggestion
       SQL
     end
 
-    def build_unit_matches_query
-      <<-SQL
+    def build_unit_matches_query # rubocop:disable Metrics/MethodLength
+      <<-SQL.squish
         SELECT R.id, COUNT(RI.ingredient_id) AS unit_match_count
         FROM recipes R
         JOIN recipe_ingredients RI
@@ -120,7 +120,7 @@ class Suggestion
     end
 
     def build_ingredient_matches_query
-      <<-SQL
+      <<-SQL.squish
         SELECT R.id, COUNT(RI.ingredient_id) AS ingredient_match_count
         FROM recipes R
         JOIN recipe_ingredients RI
@@ -131,11 +131,11 @@ class Suggestion
       SQL
     end
 
-    def build_recipes_query(
+    def build_recipes_query( # rubocop:disable Metrics/MethodLength, Metrics/ParameterLists
       suggestion, available_ingredients_query, full_perfect_matches_query,
       partial_perfect_matches_query, unit_matches_query, ingredient_matches_query
     )
-      <<-SQL
+      <<-SQL.squish
         WITH
           available_ingredients AS (#{available_ingredients_query}),
           full_perfect_matches AS (#{full_perfect_matches_query}),
@@ -143,7 +143,7 @@ class Suggestion
           unit_matches AS (#{unit_matches_query}),
           ingredient_matches AS (#{ingredient_matches_query})
 
-        SELECT 
+        SELECT#{' '}
           R.id, R.name,
           COALESCE(FPM.full_perfect_match_count, 0) AS fpm,
           COALESCE(PPM.partial_perfect_match_count, 0) AS ppm,
@@ -157,21 +157,21 @@ class Suggestion
             COALESCE(IM.ingredient_match_count, 0)
           ) AS score,
           COALESCE(FPM.full_perfect_match_count, 0) > 0 AS perfect
-        
+
         FROM recipes R
-        
+
         LEFT OUTER JOIN recipe_ingredients RI ON RI.recipe_id = R.id
         LEFT OUTER JOIN full_perfect_matches FPM ON FPM.id = R.id
         LEFT OUTER JOIN partial_perfect_matches PPM ON PPM.id = R.id
         LEFT OUTER JOIN unit_matches UM ON UM.id = R.id
         LEFT OUTER JOIN ingredient_matches IM ON IM.id = R.id
-        
+
         WHERE FPM.id IS NOT NULL OR PPM.id IS NOT NULL
-        
+
         #{'AND FPM.full_perfect_match_count > 0' if suggestion.perfect_match_only}
-        
+
         GROUP BY R.id, FPM.full_perfect_match_count, PPM.partial_perfect_match_count, UM.unit_match_count, IM.ingredient_match_count
-        
+
         ORDER BY
           score DESC,
           FPM.full_perfect_match_count,

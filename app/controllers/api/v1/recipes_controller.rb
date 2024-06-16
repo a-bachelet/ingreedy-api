@@ -46,9 +46,9 @@ module Api
       end
 
       def suggest
-         suggestion = Suggestion::CreateService.call(suggest_params)
+        suggestion = Suggestion::CreateService.call(suggest_params)
 
-         if suggestion.invalid? || suggestion.errors.any?
+        if suggestion.invalid? || suggestion.errors.any?
           render json: { errors: suggestion.errors }, status: :unprocessable_entity
         else
           render json: { suggestion: }, status: :ok
@@ -76,7 +76,7 @@ module Api
       end
 
       def suggest_params
-        params.require(:suggestion).permit(:perfect_match_only, ingredients: %i[id, quantity, unit_id])
+        params.require(:suggestion).permit(:perfect_match_only, ingredients: %i[id quantity unit_id])
       end
     end
   end

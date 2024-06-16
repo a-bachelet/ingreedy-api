@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: suggestions
@@ -11,6 +13,8 @@
 #
 FactoryBot.define do
   factory :suggestion do
-    
+    ingredients { {} }
+    perfect_match_only { false }
+    recipes { {} }
   end
 end

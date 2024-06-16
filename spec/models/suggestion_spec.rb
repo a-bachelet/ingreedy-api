@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # == Schema Information
 #
 # Table name: suggestions
@@ -11,6 +13,6 @@
 #
 require 'rails_helper'
 
-RSpec.describe Suggestion, type: :model do
+RSpec.describe Suggestion do
   pending "add some examples to (or delete) #{__FILE__}"
 end
