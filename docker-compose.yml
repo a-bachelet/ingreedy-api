@@ -11,5 +11,17 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  db_admin:
+    image: dpage/pgadmin4
+    container_name: ingreedy_db_admin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ingreedy@ingreedy.com
+      PGADMIN_DEFAULT_PASSWORD: '1NGr33Dy'
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+
 volumes:
   pgdata:
+  pgadmindata:

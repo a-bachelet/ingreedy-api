@@ -180,12 +180,14 @@ def find_or_create_tags(normalized_tags)
 end
 
 def find_or_create_recipe_ingredients(normalized_ingredients)
-  normalized_ingredients.map do |ingredient|
-    ingredient = find_or_create_ingredient(ingredient['name'])
-    unit = find_or_create_unit(ingredient['unit'])
-    
-    RecipeIngredient.new(ingredient:, quantity: ingredient['quantity'], unit:)
+  recipe_ingredients = normalized_ingredients.map do |normalized_ingredient|
+    ingredient = find_or_create_ingredient(normalized_ingredient['name'])
+    unit = find_or_create_unit(normalized_ingredient['unit'])
+
+    RecipeIngredient.new(ingredient:, quantity: normalized_ingredient['quantity'], unit:)
   end
+
+  recipe_ingredients.uniq { _1.ingredient.id }
 end
 
 def find_or_create_ingredient(normalized_ingredient)
