@@ -6,9 +6,9 @@ ruby '3.3.1'
 
 # Base
 gem 'bootsnap', require: false
-gem "pagy", "~> 8.4"
+gem 'pagy', '~> 8.4'
 gem 'pg', '~> 1.5'
-gem "pg_search", "~> 2.3"
+gem 'pg_search', '~> 2.3'
 gem 'puma', '>= 5.0'
 gem 'rails', '~> 7.1.3', '>= 7.1.3.3'
 gem 'redis', '~> 5.2'

@@ -22,7 +22,7 @@ module Api
 
         render json: { error: 'Ingredient not found in the fridge' }, status: :not_found unless fridge_ingredient
 
-        quantity = add_ingredient_params[:quantity]        
+        quantity = add_ingredient_params[:quantity]
         unit = Unit.find(add_ingredient_params[:unit_id])
 
         fridge_ingredient.update(quantity:, unit:)
@@ -39,7 +39,7 @@ module Api
 
         fridge_ingredient&.destroy
 
-        render json: nil, status: :no_content
+        render status: :no_content
       end
 
       private

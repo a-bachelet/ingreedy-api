@@ -16,6 +16,6 @@ class Ingredient < ApplicationRecord
   has_many :recipes, through: :recipe_ingredients
 
   validates :names, presence: true
-  
+
   pg_search_scope :search, against: :names
 end

@@ -23,5 +23,5 @@ class RecipeTag < ApplicationRecord
   belongs_to :recipe
   belongs_to :tag
 
-  self.primary_key = [:recipe_id, :tag_id]
+  self.primary_key = %i[recipe_id tag_id]
 end

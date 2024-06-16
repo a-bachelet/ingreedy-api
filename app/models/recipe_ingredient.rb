@@ -28,5 +28,5 @@ class RecipeIngredient < ApplicationRecord
   belongs_to :ingredient
   belongs_to :unit, optional: true
 
-  self.primary_key = [:recipe_id, :ingredient_id]
+  self.primary_key = %i[recipe_id ingredient_id]
 end

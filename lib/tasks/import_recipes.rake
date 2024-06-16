@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-namespace :recipes do
+namespace :recipes do # rubocop:disable Metrics/BlockLength
   desc 'Import recipes from a static JSON file'
-  task import: :environment do
+  task import: :environment do # rubocop:disable Metrics/BlockLength
     setup_parsing_helpers
-    
+
     unprocessed_recipes = load_recipes_from_json_file
 
     ignore_duplicates!(unprocessed_recipes)
@@ -17,13 +17,13 @@ namespace :recipes do
     puts "🤖 #{total_count} recipes can be imported !"
     puts ''
 
-    unprocessed_recipes.each_with_index do |unprocessed_recipe, index|      
+    unprocessed_recipes.each_with_index do |unprocessed_recipe, index| # rubocop:disable Metrics/BlockLength
       begin
         puts "🧠 Normalizing recipe '#{index + 1}/#{total_count}'..."
         normalized_recipe = normalize_recipe(unprocessed_recipe)
         puts "✅ Recipe '#{index + 1}/#{total_count}' normalized successfully !"
-      rescue StandardError => err
-        puts "❌ Error normalizing recipe '#{index + 1}/#{total_count}'. (#{err.class})"
+      rescue StandardError => e
+        puts "❌ Error normalizing recipe '#{index + 1}/#{total_count}'. (#{e.class})"
         failures += 1
       end
 
@@ -43,15 +43,15 @@ namespace :recipes do
           puts "✅ Recipe '#{index + 1}/#{total_count}' imported successfully !"
           successes += 1
         end
-      rescue StandardError => err
-        puts "❌ Error importing recipe '#{index + 1}/#{total_count}'. (#{err.class})"
+      rescue StandardError => e
+        puts "❌ Error importing recipe '#{index + 1}/#{total_count}'. (#{e.class})"
         failures += 1
       end
 
       puts '' unless index + 1 == total_count
     end
 
-    if failures == 0
+    if failures.zero?
       puts "🤖 'Recipes Import Script' finished successfully ! 🍾"
     else
       puts "🤖 'Recipes Import Script' finished with errors... 🔥"
@@ -63,17 +63,17 @@ namespace :recipes do
   end
 end
 
-def setup_parsing_helpers
+def setup_parsing_helpers # rubocop:disable Mwetrics/MethodLength
   @time_regex = /^(?:^|(\d+)j)?(?:^|(\d+)h)?(?:^|(\d+)(?:m|mn|min|))?$/
-  
+
   @raw_keys = %w[rate author_tip name author people_quantity image]
-  
+
   @budgets_matrix = {
     'bon marché' => 'affordable',
     'coût moyen' => 'medium',
     'assez cher' => 'high'
   }
-  
+
   @difficulties_matrix = {
     'très facile' => 'very_easy',
     'facile' => 'easy',
@@ -82,23 +82,23 @@ def setup_parsing_helpers
   }
 end
 
-def load_recipes_from_json_file
+def load_recipes_from_json_file # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
   filename = 'static/recipes-fr.json'
   file = File.read(filename)
-  
+
   recipes = JSON.parse(file)
-  
+
   recipes.reject! do |recipe|
     recipe['image'].nil? || recipe['image']&.empty? ||
-    recipe['ingredients'].nil? || recipe['ingredients']&.empty? ||
-    !@time_regex.match?(recipe['prep_time'].delete(' ').downcase) ||
-    !@time_regex.match?(recipe['cook_time'].delete(' ').downcase) ||
-    !@time_regex.match?(recipe['total_time'].delete(' ').downcase)
+      recipe['ingredients'].nil? || recipe['ingredients']&.empty? ||
+      !@time_regex.match?(recipe['prep_time'].delete(' ').downcase) ||
+      !@time_regex.match?(recipe['cook_time'].delete(' ').downcase) ||
+      !@time_regex.match?(recipe['total_time'].delete(' ').downcase)
   end
 end
 
 def ignore_duplicates!(unprocessed_recipes)
-  unprocessed_recipes.reject! { !!Recipe.find_by(name: _1['name']) }
+  unprocessed_recipes.reject! { Recipe.find_by(name: _1['name']) }
 end
 
 def normalize_recipe(unprocessed_recipe)
@@ -134,14 +134,14 @@ def normalize_tags(unprocessed_recipe, normalized_recipe)
   normalized_recipe[:tags] = unprocessed_recipe['tags'].index_with { slugify(_1) }
 end
 
-def normalize_times(unprocessed_recipe, normalized_recipe)
+def normalize_times(unprocessed_recipe, normalized_recipe) # rubocop:disable Metrics/AbcSize
   parsed_prep_time = @time_regex.match(unprocessed_recipe['prep_time'].delete(' ').downcase)[1..3]
   parsed_cook_time = @time_regex.match(unprocessed_recipe['cook_time'].delete(' ').downcase)[1..3]
   parsed_total_time = @time_regex.match(unprocessed_recipe['total_time'].delete(' ').downcase)[1..3]
 
-  prep_time_in_minutes = duration_to_minutes *parsed_prep_time
-  cook_time_in_minutes = duration_to_minutes *parsed_cook_time
-  total_time_in_minutes = duration_to_minutes *parsed_total_time
+  prep_time_in_minutes = duration_to_minutes(*parsed_prep_time)
+  cook_time_in_minutes = duration_to_minutes(*parsed_cook_time)
+  total_time_in_minutes = duration_to_minutes(*parsed_total_time)
 
   normalized_recipe[:prep_time] = prep_time_in_minutes
   normalized_recipe[:cook_time] = cook_time_in_minutes
@@ -154,7 +154,7 @@ def normalize_ingredients(unprocessed_recipe, normalized_recipe)
   normalized_recipe[:ingredients] = normalized_ingredients['ingredients']
 end
 
-def import_recipe(normalized_recipe)
+def import_recipe(normalized_recipe) # rubocop:disable Metrics/MethodLength
   Recipe.create(
     name: normalized_recipe[:name],
     slug: normalized_recipe[:slug],
@@ -210,12 +210,12 @@ def duration_to_minutes(days, hours, minutes)
   days_minutes + hours_minutes + minutes
 end
 
-def make_ingredients_usable(message)
+def make_ingredients_usable(message) # rubocop:disable Metrics/MethodLength
   system_prompt = <<-STR
     You are a JSON parser, you identify as a JSON parser.
     Your role is to help us to extract ingredients informations from food recipes ingredients list.
     I will give you JSON objects that represent food recipes ingredients list.
-    
+
     For example :
     [
     "600g de pâte à crêpe",
@@ -231,26 +231,26 @@ def make_ingredients_usable(message)
     "1/2poignée de pistache concassées",
     "2cuillères à soupe d'amandes effilées"
     ]
-    
+
     For each ingredient of the list, i want three informations : the name, the quantity, and the unit.
     Every ingredient will be exposed in french.
-    
+
     I want you to always give me results with form of { name: { singular: string, plural: string }, quantity: integer, unit: { singular: string, plural: string } }
-    
+
     Every plural form of ingredient name or ingredient unit must be the french plural form of it.
   STR
 
   messages = [
-    { role: :system, content: system_prompt},
+    { role: :system, content: system_prompt },
     { role: :user, content: message }
   ]
-  
+
   openai = OpenAI::Client.new(access_token: ENV.fetch('OPENAI_KEY'))
-  
+
   parameters = {
     model: 'gpt-3.5-turbo',
     messages:,
-    response_format:{ type: :json_object }
+    response_format: { type: :json_object }
   }
 
   openai.chat(parameters:)

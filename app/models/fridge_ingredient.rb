@@ -28,9 +28,7 @@ class FridgeIngredient < ApplicationRecord
   belongs_to :ingredient
   belongs_to :unit, optional: true
 
-  self.primary_key = [:fridge_id, :ingredient_id]
+  self.primary_key = %i[fridge_id ingredient_id]
 
-  validates :fridge_id, presence: true
-  validates :ingredient_id, presence: true
-  validates :ingredient_id, uniqueness: { scope: :fridge_id, message: 'Ingredient is already in the fridge.' }
+  validates :ingredient_id, uniqueness: { scope: :fridge_id, message: 'Ingredient is already in the fridge.' } # rubocop:disable Rails/I18nLocaleTexts, Rails/UniqueValidationWithoutIndex
 end

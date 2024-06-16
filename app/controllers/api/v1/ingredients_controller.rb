@@ -5,13 +5,13 @@ module Api
     class IngredientsController < ApplicationController
       include Pagy::Backend
 
-      rescue_from Pagy::OverflowError, :with => :not_found
+      rescue_from Pagy::OverflowError, with: :not_found
 
       SORT_KEYS = %w[names].freeze
       SORT_DIRECTIONS = %w[asc desc].freeze
 
-      DEFAULT_SORT_KEY = 'names'.freeze
-      DEFAULT_SORT_DIRECTION = 'asc'.freeze
+      DEFAULT_SORT_KEY = 'names'
+      DEFAULT_SORT_DIRECTION = 'asc'
 
       def list
         @pagy, @records = pagy(ingredients)
@@ -27,8 +27,8 @@ module Api
         render json: { ingredients: @records, pagination: }
       end
 
-      def search
-        search = params[:search] || ''
+      def search # rubocop:disable Metrics/MethodLength
+        params[:search] || ''
 
         @records = ingredients.search(params[:search])
 
@@ -52,13 +52,17 @@ module Api
         provided_sort_direction = params[:sort_direction]
 
         sort_key = SORT_KEYS.include?(provided_sort_key) ? provided_sort_key : DEFAULT_SORT_KEY
-        sort_direction = SORT_DIRECTIONS.include?(provided_sort_direction) ? provided_sort_direction : DEFAULT_SORT_DIRECTION
+        sort_direction = if SORT_DIRECTIONS.include?(provided_sort_direction)
+                           provided_sort_direction
+                         else
+                           DEFAULT_SORT_DIRECTION
+                         end
 
         Ingredient.order(sort_key.to_sym => sort_direction.to_sym)
       end
 
       def not_found
-        raise ActionController::RoutingError.new("Not Found")
+        raise ActionController::RoutingError, 'Not Found'
       end
     end
   end
