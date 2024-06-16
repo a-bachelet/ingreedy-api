@@ -24,10 +24,26 @@ module Api
           next_page: @pagy.next
         }
 
-        render json: { recipes: @records, pagination: }
+        render json: { recipes: @records.to_json_list, pagination: }
       end
 
-      def search; end
+      def search
+        params[:search] || ''
+
+        @records = recipes.search(params[:search])
+
+        @pagy, @records = pagy(@records)
+
+        pagination = {
+          count: @pagy.items,
+          total_count: @pagy.count,
+          page: @pagy.page,
+          prev_page: @pagy.prev,
+          next_page: @pagy.next
+        }
+
+        render json: { recipes: Recipe.from(@records, :recipes).to_json_list, pagination: }
+      end
 
       def suggest; end
 

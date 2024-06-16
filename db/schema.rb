@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_15_194908) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_16_084140) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,12 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_15_194908) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "names", default: "{:singular=>\"\", :plural=>\"\"}", null: false
+    t.tsvector "search_vector"
+    t.index ["search_vector"], name: "index_ingredients_on_search_vector", using: :gin
+  end
+
+  create_table "ingredients_singulars", id: false, force: :cascade do |t|
+    t.text "string_agg"
   end
 
   create_table "recipe_ingredients", primary_key: ["recipe_id", "ingredient_id"], force: :cascade do |t|
@@ -78,6 +84,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_15_194908) do
     t.string "author_tip"
     t.integer "people_quantity", default: 1, null: false
     t.enum "difficulty", default: "medium", null: false, enum_type: "recipe_difficulty"
+    t.tsvector "search_vector"
+    t.index ["search_vector"], name: "index_recipes_on_search_vector", using: :gin
     t.index ["slug"], name: "index_recipes_on_slug", unique: true
   end
 

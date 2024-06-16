@@ -15,6 +15,7 @@
 #  people_quantity :integer          default(1), not null
 #  prep_time       :integer          default(0), not null
 #  rate            :decimal(, )      default(0.0), not null
+#  search_vector   :tsvector
 #  slug            :string           default(""), not null
 #  total_time      :integer          default(0), not null
 #  created_at      :datetime         not null
@@ -22,7 +23,8 @@
 #
 # Indexes
 #
-#  index_recipes_on_slug  (slug) UNIQUE
+#  index_recipes_on_search_vector  (search_vector) USING gin
+#  index_recipes_on_slug           (slug) UNIQUE
 #
 require 'rails_helper'
 
