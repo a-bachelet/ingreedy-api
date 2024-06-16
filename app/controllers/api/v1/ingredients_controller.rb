@@ -24,7 +24,7 @@ module Api
           next_page: @pagy.next
         }
 
-        render json: { data: @records, pagination: }
+        render json: { ingredients: @records, pagination: }
       end
 
       def search
@@ -42,7 +42,7 @@ module Api
           next_page: @pagy.next
         }
 
-        render json: { data: @records, pagination: }
+        render json: { ingredients: @records, pagination: }
       end
 
       private
