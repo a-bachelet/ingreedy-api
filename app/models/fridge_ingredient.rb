@@ -39,4 +39,14 @@ class FridgeIngredient < ApplicationRecord
               'ingredients.names AS ingredient_names',
               'units.names AS unit_names')
   end
+
+  def to_json_item
+    {
+      ingredient_id:,
+      quantity:,
+      unit_id:,
+      ingredient_names: ingredient.names,
+      unit_names: unit.names
+    }
+  end
 end

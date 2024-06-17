@@ -7,7 +7,7 @@ module Api
         render json: { ingredients: fridge.fridge_ingredients.to_json_list }
       end
 
-      def add_ingredient
+      def add_ingredient # rubocop:disable Metrics/AbcSize
         ingredient = Ingredient.find(add_ingredient_params[:id])
         quantity = add_ingredient_params[:quantity]
         unit = Unit.find(add_ingredient_params[:unit_id])
@@ -17,11 +17,11 @@ module Api
         if fridge_ingredient.invalid? || fridge_ingredient.errors.any?
           render json: { errors: fridge_ingredient.errors }, status: :unprocessable_entity
         else
-          render json: { fridge_ingredient: }, status: :created
+          render json: { fridge_ingredient: fridge_ingredient.to_json_item }, status: :created
         end
       end
 
-      def update_ingredient
+      def update_ingredient # rubocop:disable Metrics/AbcSize
         fridge_ingredient = FridgeIngredient.find_by(ingredient_id: add_ingredient_params[:id])
 
         render json: { error: 'Ingredient not found in the fridge' }, status: :not_found unless fridge_ingredient
@@ -34,7 +34,7 @@ module Api
         if fridge_ingredient.invalid? || fridge_ingredient.errors.any?
           render json: { errors: fridge_ingredient.errors }, status: :unprocessable_entity
         else
-          render json: { fridge_ingredient: }, status: :ok
+          render json: { fridge_ingredient: fridge_ingredient.to_json_item }, status: :ok
         end
       end
 
